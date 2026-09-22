@@ -4,7 +4,8 @@ import { db } from "@/prisma/db";
 import type { TodoDto, ApiErrorResponse } from "../route";
 
 export type UpdateTodoRequest = {
-  isCompleted: boolean;
+  isCompleted?: boolean;
+  dueDate?: string | null;
 };
 
 export type UpdateTodoResponse = TodoDto;
@@ -34,9 +35,11 @@ export async function PATCH(
   const { id } = await params;
   const body: UpdateTodoRequest = await request.json();
 
-  const todo = await db.orm.public.Todo.where({ id, userId }).update({
-    isCompleted: body.isCompleted,
-  });
+  const data: { isCompleted?: boolean; dueDate?: string | null } = {};
+  if (body.isCompleted !== undefined) data.isCompleted = body.isCompleted;
+  if (body.dueDate !== undefined) data.dueDate = body.dueDate;
+
+  const todo = await db.orm.public.Todo.where({ id, userId }).update(data);
 
   if (!todo) {
     const errorBody: ApiErrorResponse = { error: "Not found" };
@@ -47,6 +50,7 @@ export async function PATCH(
     id: todo.id,
     title: todo.title,
     isCompleted: todo.isCompleted,
+    dueDate: todo.dueDate,
     createdAt: todo.createdAt,
   };
 

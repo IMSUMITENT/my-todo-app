@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'a3295138133ecb40fddf683846a786cdaef10ca5721c7f16f39cb7a8ba010895'>;
+  StorageHashBase<'c0482808867847390f25767c7f1890f7b97acace15919ce7791b5afbdf35f5b0'>;
 export type ExecutionHash =
   ExecutionHashBase<'00ac1d5e9e28221ae6dcddbda38165110580246f09e6105a888507be62d69ccb'>;
 export type ProfileHash =
@@ -247,7 +247,6 @@ export type FieldOutputTypes = {
       readonly userId: CodecTypes['pg/uuid@1']['output'];
       readonly title: CodecTypes['pg/text@1']['output'];
       readonly isCompleted: CodecTypes['pg/bool@1']['output'];
-      readonly dueDate: CodecTypes['pg/date-string@1']['output'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     };
   };
@@ -259,7 +258,6 @@ export type FieldInputTypes = {
       readonly userId: CodecTypes['pg/uuid@1']['input'];
       readonly title: CodecTypes['pg/text@1']['input'];
       readonly isCompleted: CodecTypes['pg/bool@1']['input'];
-      readonly dueDate: CodecTypes['pg/date-string@1']['input'] | null;
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
     };
   };
@@ -268,7 +266,6 @@ export type StorageColumnTypes = {
   readonly public: {
     readonly todos: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['output'];
-      readonly due_date: CodecTypes['pg/date-string@1']['output'] | null;
       readonly id: CodecTypes['pg/uuid@1']['output'];
       readonly is_completed: CodecTypes['pg/bool@1']['output'];
       readonly title: CodecTypes['pg/text@1']['output'];
@@ -280,7 +277,6 @@ export type StorageColumnInputTypes = {
   readonly public: {
     readonly todos: {
       readonly created_at: CodecTypes['pg/timestamptz-string@1']['input'];
-      readonly due_date: CodecTypes['pg/date-string@1']['input'] | null;
       readonly id: CodecTypes['pg/uuid@1']['input'];
       readonly is_completed: CodecTypes['pg/bool@1']['input'];
       readonly title: CodecTypes['pg/text@1']['input'];
@@ -295,7 +291,6 @@ export namespace Models {
     userId: CodecTypes['pg/uuid@1']['output'];
     title: CodecTypes['pg/text@1']['output'];
     isCompleted: CodecTypes['pg/bool@1']['output'];
-    dueDate: CodecTypes['pg/date-string@1']['output'] | null;
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     readonly [RelationKeys]?: never;
   };
@@ -351,11 +346,6 @@ type ContractBase = Omit<
                     readonly value: DefaultLiteralValue<'pg/bool@1', false>;
                   };
                 };
-                readonly due_date: {
-                  readonly nativeType: 'date';
-                  readonly codecId: 'pg/date-string@1';
-                  readonly nullable: true;
-                };
                 readonly created_at: {
                   readonly nativeType: 'timestamptz';
                   readonly codecId: 'pg/timestamptz-string@1';
@@ -403,10 +393,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
               };
-              readonly dueDate: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/date-string@1' };
-              };
               readonly createdAt: {
                 readonly nullable: false;
                 readonly type: {
@@ -424,7 +410,6 @@ type ContractBase = Omit<
                 readonly userId: { readonly column: 'user_id' };
                 readonly title: { readonly column: 'title' };
                 readonly isCompleted: { readonly column: 'is_completed' };
-                readonly dueDate: { readonly column: 'due_date' };
                 readonly createdAt: { readonly column: 'created_at' };
               };
             };

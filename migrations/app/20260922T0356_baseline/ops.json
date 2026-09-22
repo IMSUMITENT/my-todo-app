@@ -1,0 +1,269 @@
+[
+  {
+    "id": "schema.public",
+    "label": "Create schema \"public\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "Create schema \"public\"",
+        "sql": "CREATE SCHEMA IF NOT EXISTS \"public\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "table.todos",
+    "label": "Create table \"todos\"",
+    "summary": "Creates table \"todos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "todos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"todos\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"todos\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"todos\"",
+        "sql": "CREATE TABLE \"public\".\"todos\" (\n  \"created_at\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" uuid NOT NULL,\n  \"is_completed\" bool DEFAULT false NOT NULL,\n  \"title\" text NOT NULL,\n  \"user_id\" uuid NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"todos\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"todos\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rowLevelSecurity.public.todos",
+    "label": "Enable row-level security on \"todos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rowLevelSecurity",
+        "name": "todos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "check RLS is not already enabled on \"todos\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND NOT (\"c\".\"relrowsecurity\"))) AS \"result\"",
+        "params": [
+          "public",
+          "todos"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "enable row-level security on \"todos\"",
+        "sql": "ALTER TABLE \"public\".\"todos\" ENABLE ROW LEVEL SECURITY"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify row-level security is enabled on \"todos\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_class\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"c\".\"relrowsecurity\")) AS \"result\"",
+        "params": [
+          "public",
+          "todos"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rlsPolicy.public.todos.Users can delete their own todos",
+    "label": "Create RLS policy \"Users can delete their own todos\" on \"todos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rlsPolicy",
+        "name": "Users can delete their own todos",
+        "table": "todos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure RLS policy \"Users can delete their own todos\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can delete their own todos"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create RLS policy \"Users can delete their own todos\"",
+        "sql": "CREATE POLICY \"Users can delete their own todos\" ON \"public\".\"todos\" AS PERMISSIVE FOR DELETE TO authenticated USING ((auth.uid() = user_id))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify RLS policy \"Users can delete their own todos\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can delete their own todos"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rlsPolicy.public.todos.Users can insert their own todos",
+    "label": "Create RLS policy \"Users can insert their own todos\" on \"todos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rlsPolicy",
+        "name": "Users can insert their own todos",
+        "table": "todos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure RLS policy \"Users can insert their own todos\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can insert their own todos"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create RLS policy \"Users can insert their own todos\"",
+        "sql": "CREATE POLICY \"Users can insert their own todos\" ON \"public\".\"todos\" AS PERMISSIVE FOR INSERT TO authenticated WITH CHECK ((auth.uid() = user_id))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify RLS policy \"Users can insert their own todos\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can insert their own todos"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rlsPolicy.public.todos.Users can update their own todos",
+    "label": "Create RLS policy \"Users can update their own todos\" on \"todos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rlsPolicy",
+        "name": "Users can update their own todos",
+        "table": "todos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure RLS policy \"Users can update their own todos\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can update their own todos"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create RLS policy \"Users can update their own todos\"",
+        "sql": "CREATE POLICY \"Users can update their own todos\" ON \"public\".\"todos\" AS PERMISSIVE FOR UPDATE TO authenticated USING ((auth.uid() = user_id)) WITH CHECK ((auth.uid() = user_id))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify RLS policy \"Users can update their own todos\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can update their own todos"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rlsPolicy.public.todos.Users can view their own todos",
+    "label": "Create RLS policy \"Users can view their own todos\" on \"todos\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "rlsPolicy",
+        "name": "Users can view their own todos",
+        "table": "todos"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure RLS policy \"Users can view their own todos\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can view their own todos"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create RLS policy \"Users can view their own todos\"",
+        "sql": "CREATE POLICY \"Users can view their own todos\" ON \"public\".\"todos\" AS PERMISSIVE FOR SELECT TO authenticated USING ((auth.uid() = user_id))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify RLS policy \"Users can view their own todos\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_policies\" WHERE (\"schemaname\" = $1 AND \"tablename\" = $2 AND \"policyname\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "todos",
+          "Users can view their own todos"
+        ]
+      }
+    ]
+  }
+]

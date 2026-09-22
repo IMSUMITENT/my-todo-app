@@ -22,6 +22,13 @@
                   "kind": "scalar"
                 }
               },
+              "dueDate": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/date-string@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -57,6 +64,9 @@
                 "createdAt": {
                   "column": "created_at"
                 },
+                "dueDate": {
+                  "column": "due_date"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -82,6 +92,64 @@
     "namespaces": {
       "public": {
         "entries": {
+          "policy": {
+            "Users_can_delete_their_own_todos": {
+              "kind": "policy",
+              "name": "Users can delete their own todos",
+              "namespaceId": "public",
+              "operation": "delete",
+              "permissive": true,
+              "roles": [
+                "authenticated"
+              ],
+              "tableName": "todos",
+              "using": "(auth.uid() = user_id)"
+            },
+            "Users_can_insert_their_own_todos": {
+              "kind": "policy",
+              "name": "Users can insert their own todos",
+              "namespaceId": "public",
+              "operation": "insert",
+              "permissive": true,
+              "roles": [
+                "authenticated"
+              ],
+              "tableName": "todos",
+              "withCheck": "(auth.uid() = user_id)"
+            },
+            "Users_can_update_their_own_todos": {
+              "kind": "policy",
+              "name": "Users can update their own todos",
+              "namespaceId": "public",
+              "operation": "update",
+              "permissive": true,
+              "roles": [
+                "authenticated"
+              ],
+              "tableName": "todos",
+              "using": "(auth.uid() = user_id)",
+              "withCheck": "(auth.uid() = user_id)"
+            },
+            "Users_can_view_their_own_todos": {
+              "kind": "policy",
+              "name": "Users can view their own todos",
+              "namespaceId": "public",
+              "operation": "select",
+              "permissive": true,
+              "roles": [
+                "authenticated"
+              ],
+              "tableName": "todos",
+              "using": "(auth.uid() = user_id)"
+            }
+          },
+          "rls": {
+            "todos": {
+              "kind": "rls",
+              "namespaceId": "public",
+              "tableName": "todos"
+            }
+          },
           "table": {
             "todos": {
               "columns": {
@@ -93,6 +161,11 @@
                   },
                   "nativeType": "timestamptz",
                   "nullable": false
+                },
+                "due_date": {
+                  "codecId": "pg/date-string@1",
+                  "nativeType": "date",
+                  "nullable": true
                 },
                 "id": {
                   "codecId": "pg/uuid@1",
@@ -134,7 +207,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "ada0b0d5f5231aea36b93700b582f811a81440d1b706a6fca1e4184b723acd83"
+    "storageHash": "a3295138133ecb40fddf683846a786cdaef10ca5721c7f16f39cb7a8ba010895"
   },
   "execution": {
     "executionHash": "00ac1d5e9e28221ae6dcddbda38165110580246f09e6105a888507be62d69ccb",

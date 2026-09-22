@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma skills sync (AI agent reference docs, regenerate with `prisma skills sync`)
+/.claude/skills/
+/.cursor/skills/
+/.agents/
+/.devin/

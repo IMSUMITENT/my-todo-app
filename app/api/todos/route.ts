@@ -6,6 +6,7 @@ export type TodoDto = {
   id: string;
   title: string;
   isCompleted: boolean;
+  dueDate: string | null;
   createdAt: string;
 };
 
@@ -13,6 +14,7 @@ export type GetTodosResponse = TodoDto[];
 
 export type CreateTodoRequest = {
   title: string;
+  dueDate?: string | null;
 };
 
 export type CreateTodoResponse = TodoDto;
@@ -44,6 +46,7 @@ export async function GET() {
     id: todo.id,
     title: todo.title,
     isCompleted: todo.isCompleted,
+    dueDate: todo.dueDate,
     createdAt: todo.createdAt,
   }));
 
@@ -67,12 +70,14 @@ export async function POST(request: Request) {
   const todo = await db.orm.public.Todo.create({
     userId,
     title,
+    dueDate: body.dueDate ?? null,
   });
 
   const response: CreateTodoResponse = {
     id: todo.id,
     title: todo.title,
     isCompleted: todo.isCompleted,
+    dueDate: todo.dueDate,
     createdAt: todo.createdAt,
   };
 
